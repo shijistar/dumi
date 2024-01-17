@@ -48,8 +48,24 @@ export function safeExcludeInMFSU(api: IApi, excludes: RegExp[]) {
  * plugin for derive default behaviors from umi
  */
 export default (api: IApi) => {
-  api.describe({ key: 'dumi:derivative' });
+  api.describe({
+    key: 'dumi:derivative',
+    config: {
+      schema(joi) {
+        return joi
+          .object({
+            allowCssModules: joi.bool().optional(),
+          })
+          .description('允许使用css modules，默认为false')
+          .optional();
+      },
+      default: {
+        allowCssModules: false,
+      },
+    },
+  });
 
+  const pluginConfig = api.userConfig['dumi:derivative'];
   // pre-check config
   api.onCheck(() => {
     // unsuitable config for library development
@@ -85,11 +101,13 @@ export default (api: IApi) => {
       !api.config.ssr || api.config.ssr.builder === 'webpack',
       'Only `webpack` builder is supported in SSR mode!',
     );
-    assert(
-      api.config.cssLoader?.modules === undefined &&
-        api.config.cssLoaderModules === undefined,
-      'CSS Modules is not supported! Because it is not suitable for UI library development, please use normal CSS, Less, etc. instead.',
-    );
+    if (!pluginConfig?.allowCssModules) {
+      assert(
+        api.config.cssLoader?.modules === undefined &&
+          api.config.cssLoaderModules === undefined,
+        'CSS Modules is not supported! Because it is not suitable for UI library development, please use normal CSS, Less, etc. instead.',
+      );
+    }
     if (api.userConfig.history && api.userConfig.history.type === 'hash') {
       logger.warn(
         'Hash history is temporarily incompatible, it is recommended to use browser history for now.',
@@ -244,7 +262,9 @@ export default (api: IApi) => {
 
   // force to disable auto CSSModules
   api.modifyBabelPresetOpts((memo) => {
-    delete memo.pluginAutoCSSModules;
+    if (!pluginConfig?.allowCssModules) {
+      delete memo.pluginAutoCSSModules;
+    }
 
     return memo;
   });

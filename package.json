@@ -1,6 +1,6 @@
 {
   "name": "dumi",
-  "version": "2.2.16",
+  "version": "2.2.16-2",
   "description": "📖 Documentation Generator of React Component",
   "keywords": [
     "generator",
@@ -47,7 +47,7 @@
     "lint": "npm run lint:es && npm run lint:css",
     "lint:css": "stylelint \"{src,test}/**/*.{css,less}\"",
     "lint:es": "eslint \"{src,test}/**/*.{js,jsx,ts,tsx}\"",
-    "prepare": "husky install && npm run build && npm run build:suites && node ./bin/dumi.js setup && npm run docs:sync",
+    "prepare": "husky install && npm run build && npm run build:suites && node ./bin/dumi.js setup",
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "vercel:build": "npm run docs:build",
